@@ -1,6 +1,17 @@
 import axios from "axios";
 import { Notification } from "./UserComponent/Announcement";
 
+// types.ts or in your component
+export interface NotificationsDTO {
+  id: number;
+  userId: number;
+  teamId: number;
+  taskId: number;
+  description: string;
+  createdAt: string; 
+  read: boolean;
+}
+
 
 const API_BASE_URL = "https://chic-integrity-production.up.railway.app/api";
 export const fetchTeams = async () => {
@@ -213,3 +224,17 @@ export const getTasks = async () => {
   return response.data;
 };
 
+export const fetchNotificationsByUserId = async (userId: number): Promise<NotificationsDTO[]> => {
+  const token = localStorage.getItem('token'); // or sessionStorage, depending on your auth flow
+
+  const response = await axios.get<NotificationsDTO[]>(
+    `${API_BASE_URL}/notifications/user/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`, // or just `token` depending on backend expectations
+      },
+    }
+  );
+
+  return response.data;
+};

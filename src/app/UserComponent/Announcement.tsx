@@ -3,7 +3,7 @@ import AnnouncementItems from './AnnouncementItems';
 import MessageSender from '../GlobalComponent/MessageSender';
 import { User } from './page';
 import { useEffect, useState } from 'react';
-import { fetchNotifications } from '../api';
+import { fetchNotifications, fetchNotificationsByUserId } from '../api';
 
 
 interface Props {
@@ -12,13 +12,12 @@ interface Props {
 
 export interface Notification {
   id: number;
-    createdAt: string;
-    description: string;
-    read: boolean;
-    taskId: number;
-    teamId: number;
-    userId: number;
-    taskName?: string;
+  userId: number;
+  teamId: number;
+  taskId: number;
+  description: string;
+  createdAt: string; 
+  read: boolean;
 }
 
 
@@ -27,8 +26,10 @@ export default function Announcement({ admin }: Props) {
 
   useEffect(() => {
     async function loadNotifications() {
+      console.log(admin?.id)
+      if (admin?.id === undefined) return; 
       try {
-        const res = await fetchNotifications(); // ✅ this now refers to the one from api.ts
+        const res = await fetchNotificationsByUserId(admin?.id); // ✅ this now refers to the one from api.ts
         setNotifications(res); // ✅ your api function already returns response.data
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
@@ -36,7 +37,7 @@ export default function Announcement({ admin }: Props) {
     }
 
     loadNotifications();
-  }, []);
+  }, [admin?.id]);
 
 
   return (
