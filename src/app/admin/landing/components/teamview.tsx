@@ -106,7 +106,7 @@ export default function TeamView({ team, allTasks, users, onClose, onEditTeam }:
             {teamMembers.map(user => (
               <li key={user.id} className="flex items-center gap-4 bg-[#23243a] p-4 rounded-lg shadow">
                 <img
-                  src={user.avatarUrl}
+                  src={user.avatarUrl || "/pattern.png"}
                   alt={user.username}
                   className="w-12 h-12 rounded-full object-cover border border-gray-700"
                 />
