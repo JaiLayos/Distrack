@@ -68,16 +68,13 @@ export default function Dashboard({ admin }: Props) {
 
                 if (ganttRef.current) {
                     ganttRef.current.innerHTML = "";
-                    new Gantt(ganttRef.current, tasksFormatted, {
-                        view_mode: "Day",
-                        custom_popup_html: null,
-                    });
-                    setTimeout(() => {
-                        ganttRef.current?.scrollTo({
-                            left: 1000, 
-                            behavior: "smooth",
-                        });
-                    }, 100);
+                    new Gantt(
+                        ganttRef.current,
+                        tasksFormatted,
+                        {
+                            view_mode: "Day",
+                        } as any 
+                    );
                 }
                 if (tasks.length > 0) {
                     const latest = tasks.reduce((latestSoFar: any, current: any) => {
