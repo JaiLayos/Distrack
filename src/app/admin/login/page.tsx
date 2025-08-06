@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+import { login } from "@/app/api";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -12,19 +11,23 @@ export default function AdminLogin() {
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      const res = await axios.post("https://chic-integrity-production.up.railway.app/api/auth/login", {
-        email,
-        password
-      });
-      localStorage.setItem("token", res.data.token);
-      router.push("/admin/landing");
-    } catch (err: any) {
-      setError("Invalid credentials. Please try again.");
-    }
-  };
+      e.preventDefault();
+      setError(null);
+  
+      try {
+        const { token, currentUser } = await login(email, password);
+  
+        if (currentUser.role !== "ADMIN") {
+          setError("Access denied. Only ADMIN role can log in here.");
+          return;
+        }
+  
+        localStorage.setItem("token", token);
+        router.push("/admin/landing");
+      } catch (err: any) {
+        setError("Invalid credentials. Please try again.");
+      }
+    };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#292b3c]">

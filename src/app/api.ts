@@ -8,7 +8,7 @@ export interface NotificationsDTO {
   teamId: number;
   taskId: number;
   description: string;
-  createdAt: string; 
+  createdAt: string;
   read: boolean;
 }
 
@@ -42,12 +42,28 @@ export const login = async (
   email: string,
   password: string
 ) => {
-  const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+  const loginResponse = await axios.post(`${API_BASE_URL}/auth/login`, {
     email,
     password,
   });
-  return response.data;
+
+  const { token, ...loginData } = loginResponse.data;
+
+  localStorage.setItem("token", token);
+
+  const userResponse = await axios.get(`${API_BASE_URL}/users/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return {
+    token,
+    loginData,
+    currentUser: userResponse.data,
+  };
 };
+
 
 export const fetchTasks = async () => {
   const response = await axios.get(`${API_BASE_URL}/tasks`);
@@ -199,7 +215,7 @@ export const updateCurrentUser = async (
 function getToken() {
   return localStorage.getItem("token");
 }
- 
+
 export const getTeams = async () => {
   const token = getToken();
   const response = await axios.get(`${API_BASE_URL}/teams`, {
@@ -207,7 +223,7 @@ export const getTeams = async () => {
   });
   return response.data;
 };
- 
+
 export const getUsers = async () => {
   const token = getToken();
   const response = await axios.get(`${API_BASE_URL}/users`, {
@@ -215,7 +231,7 @@ export const getUsers = async () => {
   });
   return response.data;
 };
- 
+
 export const getTasks = async () => {
   const token = getToken();
   const response = await axios.get(`${API_BASE_URL}/tasks`, {

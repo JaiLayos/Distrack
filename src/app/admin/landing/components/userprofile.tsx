@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { User, Team, UserRole } from "../types";
+import AvatarModal from "@/app/UserComponent/AvatarModal";
 
 type UserUpdateArgs = {
   userId: number;
@@ -10,6 +11,7 @@ type UserUpdateArgs = {
   email?: string;
   role?: UserRole;
   imageFile?: File | null;
+  avatarUrl?: string;
 };
 
 type UserProfileProps = {
@@ -32,6 +34,8 @@ export default function UserProfile({
   const [role, setRole] = useState<UserRole>(user.role ?? "")
   const [username, setUsername] = useState<string>(user.username ?? "");
   const [email, setEmail] = useState<string>(user.email ?? "");
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -48,8 +52,10 @@ export default function UserProfile({
       username,
       email,
       role,
-      imageFile
+      imageFile,
+      avatarUrl: imageFile ? undefined : previewUrl,
     });
+
     setEdit(false);
   };
 
@@ -126,19 +132,12 @@ export default function UserProfile({
                 <option value={team.id} key={team.id}>{team.name}</option>
               ))}
             </select>
-            <label
-              htmlFor="avatar-upload"
-              className="mb-4 px-4 py-2 rounded bg-blue-600 text-white font-bold cursor-pointer hover:bg-blue-700 transition block"
+            <button
+              onClick={() => setShowAvatarModal(true)}
+              className="mb-4 px-4 py-2 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 transition block w-full"
             >
               Choose Avatar
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: "none" }}
-              />
-            </label>
+            </button>
             <button onClick={handleSave} className="bg-blue-600 text-white rounded px-5 py-2 font-bold hover:bg-blue-700 transition mb-2 w-full">
               Save
             </button>
@@ -155,6 +154,17 @@ export default function UserProfile({
             >
               Cancel
             </button>
+
+            {showAvatarModal && (
+              <AvatarModal
+                onSelect={(url, file) => {
+                  setPreviewUrl(url);
+                  setImageFile(file || null);
+                  setShowAvatarModal(false);
+                }}
+              />
+            )}
+
           </>
         )}
       </div>

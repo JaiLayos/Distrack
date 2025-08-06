@@ -21,7 +21,7 @@ export default function UserList({ users, onSelect }: UserListProps) {
           className="mb-4 px-2 py-1 rounded bg-[#292b3c] text-white border border-gray-700"
         />
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto pb-20">
         <ul>
           {users.map(user => (
             <li

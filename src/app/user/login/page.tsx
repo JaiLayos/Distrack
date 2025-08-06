@@ -13,14 +13,22 @@ export default function UserLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const data = await login(email, password);
-      localStorage.setItem("token", data.token);
+      const { token, currentUser } = await login(email, password);
+
+      if (currentUser.role !== "USER") {
+        setError("Access denied. Only USER role can log in here.");
+        return;
+      }
+
+      localStorage.setItem("token", token);
       router.push("/UserComponent");
     } catch (err: any) {
       setError("Invalid credentials. Please try again.");
     }
   };
+
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#23243a]">
