@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Notification } from "./UserComponent/Announcement";
+import { UserRole } from "./admin/landing/types";
 
 // types.ts or in your component
 export interface NotificationsDTO {
@@ -11,6 +12,16 @@ export interface NotificationsDTO {
   createdAt: string;
   read: boolean;
 }
+
+type UpdateUserPayload = {
+  username?: string;
+  email?: string;
+  teamId?: number;
+  role?: UserRole;
+  avatarUrl?: string;
+};
+
+
 
 
 const API_BASE_URL = "https://chic-integrity-production.up.railway.app/api";
@@ -211,6 +222,31 @@ export const updateCurrentUser = async (
 
   return response.data;
 };
+
+export async function updateUserById(
+  id: number,
+  userData: UpdateUserPayload,
+  imageFile?: File | null
+) {
+  const formData = new FormData();
+
+  // Append the user JSON
+  formData.append("user", new Blob([JSON.stringify(userData)], { type: "application/json" }));
+
+  // Append the image only if provided
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  const response = await axios.put(`${API_BASE_URL}/users/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // if using JWT
+    },
+  });
+
+  return response.data;
+}
 
 function getToken() {
   return localStorage.getItem("token");

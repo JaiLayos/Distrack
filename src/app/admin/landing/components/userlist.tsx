@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { User } from "../types";
 
 type UserListProps = {
@@ -9,6 +9,12 @@ type UserListProps = {
 };
 
 export default function UserList({ users, onSelect }: UserListProps) {
+  const [search, setSearch] = useState("");
+
+  const searchUsers = users.filter(user =>
+    user.username.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <section className="w-[100%] bg-[#1e202d] p-4 border-r border-gray-800 flex flex-col h-screen">
       <div>
@@ -18,12 +24,14 @@ export default function UserList({ users, onSelect }: UserListProps) {
         <input
           type="text"
           placeholder="Search users..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           className="mb-4 px-2 py-1 rounded bg-[#292b3c] text-white border border-gray-700"
         />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto pb-20">
         <ul>
-          {users.map(user => (
+          {searchUsers.map(user => (
             <li
               key={user.email}
               className="mb-2 text-gray-200 cursor-pointer hover:bg-[#23243a] p-2 rounded transition"

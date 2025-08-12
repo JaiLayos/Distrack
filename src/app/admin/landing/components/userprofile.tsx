@@ -3,61 +3,57 @@
 import React, { useState } from "react";
 import { User, Team, UserRole } from "../types";
 import AvatarModal from "@/app/UserComponent/AvatarModal";
-
-type UserUpdateArgs = {
-  userId: number;
-  teamId: number | null;
-  username?: string;
-  email?: string;
-  role?: UserRole;
-  imageFile?: File | null;
-  avatarUrl?: string;
-};
+import { updateCurrentUser, updateUserById } from "@/app/api";
 
 type UserProfileProps = {
   user: User;
   onClose: () => void;
   teams: Team[];
-  onUserUpdate: (args: UserUpdateArgs) => void;
 };
 
 export default function UserProfile({
   user,
   onClose,
   teams,
-  onUserUpdate
 }: UserProfileProps) {
   const [edit, setEdit] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState<number | "">(user.teamId ?? "");
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(user.avatarUrl ?? "");
-  const [role, setRole] = useState<UserRole>(user.role ?? "")
+  const [role, setRole] = useState<UserRole>(user.role ?? "");
   const [username, setUsername] = useState<string>(user.username ?? "");
   const [email, setEmail] = useState<string>(user.email ?? "");
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
+  const handleAvatarSelect = (url: string) => {
+    setPreviewUrl(url);
+    setShowAvatarModal(false);
   };
 
-  const handleSave = () => {
-    onUserUpdate({
-      userId: user.id,
-      teamId: selectedTeamId === "" ? null : Number(selectedTeamId),
+  const handleSave = async () => {
+    const userIdFromStorage = Number(localStorage.getItem("userId")); 
+    const payload = {
       username,
       email,
       role,
-      imageFile,
-      avatarUrl: imageFile ? undefined : previewUrl,
-    });
+      avatarUrl: previewUrl,
+      teamId: selectedTeamId === "" ? undefined : Number(selectedTeamId),
+    };
 
-    setEdit(false);
+    console.log("Update payload:", payload);
+
+    try {
+      if (user.id === userIdFromStorage) {
+        await updateCurrentUser(payload);
+      } else {
+        await updateUserById(user.id, payload);
+      }
+      setEdit(false);
+    } catch (error) {
+      console.error("Failed to update user:", error);
+      // Optionally show error message to user
+    }
   };
+
 
   const avatarBlock = previewUrl
     ? (
@@ -68,13 +64,10 @@ export default function UserProfile({
       />
     )
     : (
-      <img
-        src="/pattern.png"
-        alt="Default Avatar"
-        className="w-24 h-24 rounded-full object-cover mb-6 border-4 border-gray-700"
-      />
+      <div className="w-24 h-24 rounded-full bg-gray-700 mb-6 flex items-center justify-center text-gray-300 text-3xl border-4 border-gray-700">
+        {username?.charAt(0).toUpperCase() ?? "?"}
+      </div>
     );
-
 
   return (
     <section className="flex-1 bg-[#23243a] flex items-center justify-center h-screen">
@@ -88,10 +81,16 @@ export default function UserProfile({
             <div className="mb-6 text-green-400">
               <span className="font-semibold text-white">Team:</span> {user.teamName ?? "None"}
             </div>
-            <button onClick={() => setEdit(true)} className="px-5 py-2 bg-yellow-500 text-white rounded shadow hover:bg-yellow-600 transition mb-2">
+            <button
+              onClick={() => setEdit(true)}
+              className="px-5 py-2 bg-yellow-500 text-white rounded shadow hover:bg-yellow-600 transition mb-2"
+            >
               Edit
             </button>
-            <button onClick={onClose} className="px-5 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition">
+            <button
+              onClick={onClose}
+              className="px-5 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+            >
               Go Back
             </button>
           </>
@@ -110,7 +109,8 @@ export default function UserProfile({
               onChange={e => setRole(e.target.value as UserRole)}
               className="mb-4 px-4 py-2 rounded bg-[#23243a] text-white border border-gray-700 w-full"
               required
-            ><option value="" disabled>Select role</option>
+            >
+              <option value="" disabled>Select role</option>
               <option value="USER">User</option>
               <option value="ADMIN">Admin</option>
             </select>
@@ -132,19 +132,23 @@ export default function UserProfile({
                 <option value={team.id} key={team.id}>{team.name}</option>
               ))}
             </select>
+
             <button
               onClick={() => setShowAvatarModal(true)}
-              className="mb-4 px-4 py-2 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 transition block w-full"
+              className="mb-4 px-4 py-2 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 transition w-full"
             >
               Choose Avatar
             </button>
-            <button onClick={handleSave} className="bg-blue-600 text-white rounded px-5 py-2 font-bold hover:bg-blue-700 transition mb-2 w-full">
+
+            <button
+              onClick={handleSave}
+              className="bg-blue-600 text-white rounded px-5 py-2 font-bold hover:bg-blue-700 transition mb-2 w-full"
+            >
               Save
             </button>
             <button
               onClick={() => {
                 setEdit(false);
-                setImageFile(null);
                 setPreviewUrl(user.avatarUrl ?? "");
                 setUsername(user.username ?? "");
                 setEmail(user.email ?? "");
@@ -154,20 +158,11 @@ export default function UserProfile({
             >
               Cancel
             </button>
-
-            {showAvatarModal && (
-              <AvatarModal
-                onSelect={(url, file) => {
-                  setPreviewUrl(url);
-                  setImageFile(file || null);
-                  setShowAvatarModal(false);
-                }}
-              />
-            )}
-
           </>
         )}
       </div>
+
+      {showAvatarModal && <AvatarModal onSelect={handleAvatarSelect} />}
     </section>
   );
 }

@@ -53,7 +53,7 @@ export default function Home() {
 
   const handleTeamModalAcknowledge = () => {
     localStorage.removeItem("token");
-    window.location.reload(); // or use router.push("/login") if using Next.js routing
+    window.location.reload(); 
   };
 
 
