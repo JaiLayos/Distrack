@@ -3,8 +3,8 @@ export type User = {
   username: string;
   email: string;
   role: UserRole;
-  teamId?: number;
-  teamName?: string;
+  teamId?: number | null;
+  teamName?: string | null;
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;

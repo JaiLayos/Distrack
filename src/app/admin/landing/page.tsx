@@ -200,7 +200,6 @@ export default function AdminLanding() {
               user={selectedUser}
               onClose={() => setSelectedUser(null)}
               teams={teams}
-              onUserUpdate={handleUserUpdate}
             />
           ) : (
             <>
